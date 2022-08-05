@@ -14,32 +14,31 @@ type SillyNephewError struct {
 }
 
 func (e *SillyNephewError) Error() string {
-	return fmt.Sprintf("%s%d cows", e.message, e.details)
+	return fmt.Sprintf("%s %d cows", e.message, e.details)
 }
 
 // DivideFood computes the fodder amount per cow for the given cows.
 func DivideFood(weightFodder WeightFodder, cows int) (float64, error) {
-	negative := "negative fodder"
-	division := "division by zero"
-	amount, err := weightFodder.FodderAmount()
-	if err == nil && amount >= 0 && cows > 0 {
-		return amount / float64(cows), nil
-	}
-	if err == ErrScaleMalfunction && amount > 0 && cows > 0 {
-		return amount / float64(cows) * 2, nil
-	}
-	if amount < 0 {
-		return 0, errors.New(negative)
-	}
+	availableFodder, err := weightFodder.FodderAmount()
 	if cows == 0 {
-		return 0, errors.New(division)
-	}
-	if cows < 0 {
-		return 0, &SillyNephewError{
-			message: "silly nephew, there cannot be ",
+		return 0.0, errors.New("division by zero")
+	} else if cows < 0 {
+		return 00, &SillyNephewError{
+			message: "silly nephew, there cannot be",
 			details: cows,
 		}
-	} else {
-		return 0, errors.New("non-scale error")
 	}
+	if err == ErrScaleMalfunction {
+		if availableFodder < 0 {
+			return 0.0, errors.New("negative fodder")
+		}
+		availableFodder *= 2
+	} else if err != nil {
+		return 0.0, err
+	}
+	if availableFodder < 0 {
+		return 0.0, errors.New("negative fodder")
+	}
+
+	return availableFodder / float64(cows), nil
 }
